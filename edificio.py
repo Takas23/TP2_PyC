@@ -2,7 +2,7 @@ from oficina import *
 #from pila import Stack
 
 
-# pisos y habitaculos desde el 0 (?)
+# pisos y habitaculos desde el 0
 class EdificioEmpresa:
     def __init__(self, cantPisos, cantHabitaculos):
         self.edificio = Stack()
@@ -14,7 +14,7 @@ class EdificioEmpresa:
             nPisos -= 1
 
     def __repr__(self):
-        pass
+        return str(self.edificio)
 
 # AUXILIAR del __init__
     def creaPiso(self, habitaculos):
@@ -81,7 +81,7 @@ class EdificioEmpresa:
             while not pisoAux.isEmpty() and pisoAux.top() != nroInterno:
                 pisoAux.dequeue()
             if pisoAux.top() == nroInterno:
-                salida = piso, pisoAux.posicion(nroInterno)
+                salida = piso, pisoAux.index(nroInterno)
             else:
                 self.habitaculoOficinaEn(nroInterno, piso-1)
         return salida
@@ -130,7 +130,7 @@ class EdificioEmpresa:
                 edificioAux.pop()
             habitaculoActual = 0
             while habitaculoActual != numeroHabitaculo:
-                edificioAux.top().dequeue()
+                edificioAux.pop()
                 habitaculoActual += 1
             return edificioAux.top().top() is None
         else:

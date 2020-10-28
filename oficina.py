@@ -93,10 +93,10 @@ class OficinaAtencion:
     def eliminarAuxilio(self, nroPatente):
         aux = self.buscarAuxilio(nroPatente)
         if self.verAuxilioEn(self.colaRemolque, nroPatente):
-            pos = self.colaRemolque.posicion(aux)
+            pos = self.colaRemolque.index(aux)
             self.eliminarEn(self.colaRemolque, pos)
         elif self.verAuxilioEn(self.colaReparacion, nroPatente):
-            pos = self.colaReparacion.posicion(aux)
+            pos = self.colaReparacion.index(aux)
             self.eliminarEn(self.colaReparacion, pos)
         else:
             raise Exception("Numero de patente no valido")
@@ -105,15 +105,24 @@ class OficinaAtencion:
             cola.eliminar(posicion)
 
 # REVISAR
+# funciona, pero no elimina por completo, deja None y lo cuenta como elemento
     def cambiaDeTipo(self, nroPatente):
         if self.verAuxilio(nroPatente):
-            aux = self.buscarAuxilio(nroPatente)
-            self.eliminarAuxilio(nroPatente)
-            aux.cambiaTipo()
-            self.recibirAuxilio(aux)
-
+            self.cambiaDeCola(nroPatente)
         else:
             raise Exception("Auxilio no valido")
+
+# AUXILIAR de cambiaDeTipo()
+    def cambiaDeCola(self, nroPatente):
+        aux = self.buscarAuxilio(nroPatente)
+        pos = None
+        if aux.getTipo() == TipoAuxilio(0).name:
+            pos = self.colaRemolque.index(aux)
+        else:
+            pos = self.colaReparacion.index(aux)
+        self.eliminarAuxilio(nroPatente)
+        aux.cambiaTipo()
+        self.recibirAuxilio(aux)
 
 # VERIFICADORES
     def verAuxilioEn(self, cola, nroPatente):

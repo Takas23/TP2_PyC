@@ -47,16 +47,15 @@ class Queue:
             self.enqueue(pilaAux.pop())
 
 # devuelve la posicion/indice del elemento
-    def posicion(self, elemento):
-        posicion = 0
+    def index(self, elemento):
+        indx = 0
         colaAux = self.clone()
-        while posicion < self.size() and self.top() != elemento:
-            colaAux.dequeue()
-            posicion += 1
-        if self.top() == elemento:
-            return posicion
-        else:
-            raise Exception("Elemento no valido")
+        while not self.isEmpty():
+            if elemento != colaAux.top():
+                colaAux.dequeue()
+                indx += 1
+            else:
+                return indx
 
     def eliminar(self, posicion):
         colaAux = self.clone()
