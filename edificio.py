@@ -30,23 +30,30 @@ class EdificioEmpresa:
 
 # REVISAR
     def establecerOficina(self, numeroPiso, numeroHabitaculo, oficinaAtencion):
-        if self.habitaculoLibre(numeroPiso, numeroHabitaculo):
+        if numeroPiso == self.cantPisos - 1:
+            self.establecerOficinaUltimoPiso(numeroHabitaculo, oficinaAtencion)
+        else:
             edificioAux = self.edificio.clone().invertir()
-            pisoActual = 0
-            habitaculoActual = 0
             self.edificio.empty()
+            pisoActual = 0
             while not edificioAux.isEmpty():
-                if pisoActual == numeroPiso:
-                    pisoAux = edificioAux.top().clone()
-                    edificioAux.top().empty()
-                    while not pisoAux.isEmpty():
-                        if habitaculoActual == numeroHabitaculo:
-                            pisoAux.dequeue()
-                            edificioAux.top().enqueue(oficinaAtencion)
-                        edificioAux.top().enqueue(pisoAux.dequeue())
-                        habitaculoActual += 1
-                self.edificio.push(edificioAux.pop())
-                pisoActual += 1
+                if numeroPiso == pisoActual:
+                    self.establecerOficinaUltimoPiso(numeroHabitaculo, oficinaAtencion)
+            self.edificio.push(edificioAux.pop())
+
+
+# AUXILIAR de establecerOficina()
+# coloca la oficina en el piso superior
+    def establecerOficinaUltimoPiso(self, nroHabitaculo, oficinaAtencion):
+        piso = self.edificio.top().clone()
+        self.edificio.top().empty()
+        habitActual = 0
+        while not piso.isEmpty():
+            if nroHabitaculo == habitActual:
+                self.edificio.top().enqueue(oficinaAtencion)
+                piso.dequeue()
+            self.edificio.top().enqueue(piso.dequeue())
+            habitActual += 1
 
 # HACER RECURSIVA!
 # retorna cuantas oficinas criticas hay en el piso. (iter)
@@ -111,29 +118,36 @@ class EdificioEmpresa:
 # AUXILIAR
 # retorna un clon del piso sin modificar el edificio
     def clonPiso(self, numeroPiso):
-        edificioAux = self.edificio.clone()
-        while numeroPiso != edificioAux.size():
-            edificioAux.pop()
-        return edificioAux.top()
+        pisoAux = None
+        if self.verPiso(numeroPiso):
+            edificioAux = self.edificio.clone()
+            while numeroPiso != edificioAux.size()-1:
+                edificioAux.pop()
+            pisoAux = edificioAux.top().clone()
+        return pisoAux
 
 # VERIFICADORES
     def verPiso(self, numeroPiso):
-        return numeroPiso < self.edificio.size()
+        if numeroPiso < self.edificio.size():
+            return True
+        else:
+            raise Exception("Piso no valido")
 
-    def verHabitaculo(self, numeroHabitaculo):
-        return numeroHabitaculo < self.cantHabitaculos
+    def verHabitaculo(self,numeroPiso, numeroHabitaculo):
+        if numeroHabitaculo < self.cantHabitaculos and self.verPiso(numeroPiso):
+            return True
+        else:
+            raise Exception("Habitaculo y/o Piso no valido")
 
     def habitaculoLibre(self, numeroPiso, numeroHabitaculo):
-        if self.verPiso(numeroPiso) and self.verHabitaculo(numeroHabitaculo):
-            edificioAux = self.edificio.clone()
-            while numeroPiso != edificioAux.size():
-                edificioAux.pop()
-            habitaculoActual = 0
-            while habitaculoActual != numeroHabitaculo:
-                edificioAux.pop()
-                habitaculoActual += 1
-            return edificioAux.top().top() is None
+        if self.verHabitaculo(numeroPiso, numeroHabitaculo):
+            pisoAux = self.clonPiso(numeroPiso)
+            habitActual = 0
+            while habitActual != numeroHabitaculo:
+                pisoAux.dequeue()
+                habitActual += 1
+            return pisoAux.top() == None
         else:
-            raise Exception("Piso y/o Habitaculo no valido")
+            raise Exception("Habitaculo ocupado")
 
 

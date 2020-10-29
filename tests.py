@@ -17,6 +17,8 @@ auxilio3 = Auxilio("AAA222", "Oeste", "Oeste", "Remolque", "Espera")
 auxilio4 = Auxilio("BBB222", "Este", "CABA", "Reparacion", "Espera")
 
 oficina1 = OficinaAtencion(50)
+oficina1.recibirAuxilio(auxilio1); oficina1.recibirAuxilio(auxilio2)
+oficina1.recibirAuxilio(auxilio3); oficina1.recibirAuxilio(auxilio4)
 
 edificio1 = EdificioEmpresa(3, 4)
 
@@ -48,8 +50,6 @@ edificio1 = EdificioEmpresa(3, 4)
 
 # Remolques <[1, 3]<
 # Reparacion <[2, 4]<
-oficina1.recibirAuxilio(auxilio1); oficina1.recibirAuxilio(auxilio2)
-oficina1.recibirAuxilio(auxilio3); oficina1.recibirAuxilio(auxilio4)
 #print(oficina1.primerAuxilioAEnviar())
 #oficina1.enviarAuxilio("Sur")
 #print(oficina1.auxiliosPorTipo())
@@ -74,7 +74,14 @@ oficina1.recibirAuxilio(auxilio3); oficina1.recibirAuxilio(auxilio4)
 # Edificio
 
 print(edificio1)
-#edificio1.establecerOficina(0, 2, oficina1)
-#print(edificio1)
 
-print(edificio1.habitaculoLibre(0,2))
+#print(edificio1)
+#print(edificio1.verHabitaculo(1, 2))
+#print(edificio1.verPiso(4))
+#print(edificio1.clonPiso(0))
+#print(edificio1.habitaculoLibre(10,10))
+#edificio1.establecerOficinaUltimoPiso(1, oficina1)
+
+edificio1.establecerOficina(0, 2, oficina1)
+
+print(edificio1)
