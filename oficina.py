@@ -15,6 +15,9 @@ class OficinaAtencion:
     def __repr__(self):
         return str(self.nroInterno)
 
+    def getInterno(self):
+        return self.nroInterno
+
     def recibirAuxilio(self, auxilio):
         if auxilio.getTipo() == TipoAuxilio(0).name:
             self.colaRemolque.enqueue(auxilio)
@@ -91,18 +94,21 @@ class OficinaAtencion:
         return auxilio
 
     def eliminarAuxilio(self, nroPatente):
-        aux = self.buscarAuxilio(nroPatente)
         if self.verAuxilioEn(self.colaRemolque, nroPatente):
-            pos = self.colaRemolque.index(aux)
-            self.eliminarEn(self.colaRemolque, pos)
+            self.eliminarEn(self.colaRemolque, nroPatente)
         elif self.verAuxilioEn(self.colaReparacion, nroPatente):
-            pos = self.colaReparacion.index(aux)
-            self.eliminarEn(self.colaReparacion, pos)
+            self.eliminarEn(self.colaReparacion, nroPatente)
         else:
             raise Exception("Numero de patente no valido")
 
-    def eliminarEn(self, cola, posicion):
-            cola.eliminar(posicion)
+# AUXILIAR
+    def eliminarEn(self, cola, nroPAtente):
+        colaAux = cola.clone()
+        cola.empty()
+        while not colaAux.isEmpty():
+            if colaAux.top().getPatente() == nroPAtente:
+                colaAux.dequeue()
+            cola.enqueue(colaAux.dequeue())
 
 # REVISAR
 # funciona, pero no elimina por completo, deja None y lo cuenta como elemento
@@ -123,6 +129,10 @@ class OficinaAtencion:
         self.eliminarAuxilio(nroPatente)
         aux.cambiaTipo()
         self.recibirAuxilio(aux)
+
+# AUXILIAR
+    def esInterno(self, nroInterno):
+        return self.nroInterno == nroInterno
 
 # VERIFICADORES
     def verAuxilioEn(self, cola, nroPatente):

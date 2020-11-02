@@ -31,26 +31,35 @@ class Auxilio:
             self.tipo = TipoAuxilio(0).name
 
 # VERIFICACIONES
-# REVISAR
 def verTipo(tipo):
-    if tipo == TipoAuxilio(0).name or TipoAuxilio(1).name:
+    if tipo in TipoAuxilio._member_names_:
         return tipo
     else:
         raise Exception("Tipo no valido")
 
+#def verTipo(tipo):
+#    if tipo == 0 or 1:
+#        return TipoAuxilio(tipo).name
 
 def verEstado(estado):
-    if estado == EstadoAuxilio(0).name or EstadoAuxilio(1).name:
+    if estado in EstadoAuxilio._member_names_:
         return estado
     else:
         raise Exception("Estado no valido")
 
+#def verEstado(estado):
+#    if estado == 0 or 1:
+#        return EstadoAuxilio(estado).name
 
 def verZona(zona):
-    for z in ZonaAuxilio:
-        if zona == z.name:
-            return zona
-#        else:
-#            raise Exception("Zona no valida")
+    if zona in ZonaAuxilio._member_names_:
+        return zona
+    else:
+        raise Exception("Zona no valida")
+
+#def verZona(zona):
+#    if 0 <= zona <= 4:
+#        return ZonaAuxilio(zona).name
+
 
 

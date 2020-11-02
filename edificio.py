@@ -28,18 +28,18 @@ class EdificioEmpresa:
             piso.enqueue(None)
             self.addHabitaculos(piso, habitaculos-1)
 
-# REVISAR
+
     def establecerOficina(self, numeroPiso, numeroHabitaculo, oficinaAtencion):
-        if numeroPiso == self.cantPisos - 1:
-            self.establecerOficinaUltimoPiso(numeroHabitaculo, oficinaAtencion)
-        else:
-            edificioAux = self.edificio.clone().invertir()
+        if self.habitaculoLibre(numeroPiso, numeroHabitaculo):
+            edificioAux = self.edificio.clone()
             self.edificio.empty()
+            edificioAux.invertir()
             pisoActual = 0
             while not edificioAux.isEmpty():
+                self.edificio.push(edificioAux.pop())
                 if numeroPiso == pisoActual:
                     self.establecerOficinaUltimoPiso(numeroHabitaculo, oficinaAtencion)
-            self.edificio.push(edificioAux.pop())
+                pisoActual += 1
 
 
 # AUXILIAR de establecerOficina()
@@ -61,51 +61,125 @@ class EdificioEmpresa:
         cant = 0
         pisoActual = self.clonPiso(piso)
         while pisoActual.size() < 0:
-            if self.clonPiso(piso).dequeue().esCritica():
+            if pisoActual.dequeue().esCritica():
                 cant += 1
         return cant
 
+    def cantidadDeOficinasCriticasTotal(self, piso):
+        cant = 0
+        if piso == 0:
+            cant += self.cantidadDeOficinasCriticas(piso)
+        else:
+            cant = self.cantidadDeOficinasCriticas(piso) + self.cantidadDeOficinasCriticasTotal(piso-1)
+        return cant
+
+
+######################################
+    #REVISAR
     def oficinaMenosRecargada(self):
-        edificioAux = self.edificio.clone()
-        remolques = edificioAux.top().top().colaRemolque.size()
-        oficina = edificioAux.top().top()
-        while edificioAux.size() > 0:
-            while self.edificio.top().size > 0:
-                if remolques > edificioAux.top().top().colaRemolque.size():
-                    remolques = edificioAux.top().top().colaRemolque.size()
-                    oficina = edificioAux.top().top()
-            self.edificio.pop()
-        return self.buscaOficina(oficina)
+        pisos = self.cantPisos -1
+        aux = None
+        while pisos != 0:
+            aux = self.menorEntre(self.oficinaMenosRecargadaEnPiso(pisos), self.oficinaMenosRecargadaEnPiso(pisos-1))
+            pisos -= 1
+        return self.menorEntre(aux, self.oficinaMenosRecargadaEnPiso(0))
+
+#######################
+# AUXILIAR de oficinaMenosRecargada()
+    def oficinaMenosRecargadaEnPiso(self, numeroPiso):
+        pisoAux = self.clonPiso(numeroPiso)
+        minimo = 999
+        oficina = None
+        while not pisoAux.isEmpty():
+            if pisoAux.top() is not None:
+                if pisoAux.top().auxiliosPorTipo()[0] < minimo:
+                    minimo = pisoAux.top().auxiliosPorTipo()[0]
+                    oficina = pisoAux.dequeue()
+            pisoAux.dequeue()
+        return oficina
+
+    def menorEntre(self, ofi1, ofi2):
+        salida = ofi1
+        if ofi1 is None:
+            salida = ofi2
+        if ofi1 and ofi2:
+            if ofi1.auxiliosPorTipo()[0] > ofi2.auxiliosPorTipo()[0]:
+                salida = ofi2
+        return salida
+
+
+#######################
+
+# AUXILIAR de oficinaMenosRecargadaEnPiso()
+    def pisoVacio(self, nroPiso):
+        pisoAux = self.clonPiso(nroPiso)
+        oficinas = 0
+        while not pisoAux.isEmpty():
+            if pisoAux.top() is not None:
+                oficinas += 1
+                pisoAux.dequeue()
+            pisoAux.dequeue()
+        return oficinas == 0
 
     def buscaOficina(self, nroInterno):
-        return self.habitaculoOficinaEn(nroInterno, self.cantPisos)
+        piso = self.cantPisos - 1
+        while piso >= 0:
+            if self.habitaculoOficinaEn(nroInterno, piso) is None:
+                piso -= 1
+            else:
+                return piso, self.habitaculoOficinaEn(nroInterno, piso)
+        raise Exception("Numero de Interno no valido")
 
-# AUXILIAR
+# AUXILIAR de busca oficina
+# devuelve el nro habitaculo en donde se encuentra la oficina buscada en el piso dado
     def habitaculoOficinaEn(self, nroInterno, piso):
         pisoAux = self.clonPiso(piso)
-        salida = None
-        while piso >= 0:
-            while not pisoAux.isEmpty() and pisoAux.top() != nroInterno:
+        habitaculo = 0
+        while not pisoAux.isEmpty():
+            if pisoAux.top() is None:
                 pisoAux.dequeue()
-            if pisoAux.top() == nroInterno:
-                salida = piso, pisoAux.index(nroInterno)
+                habitaculo += 1
             else:
-                self.habitaculoOficinaEn(nroInterno, piso-1)
-        return salida
+                if pisoAux.top().getInterno() != nroInterno:
+                    pisoAux.dequeue()
+                    habitaculo += 1
+                else:
+                    return habitaculo
+
+# AUXILIAR
+# Retorna la oficina en el (piso, habitaculo)
+    def getOficinaEn(self, listPisoHabit):
+        piso = listPisoHabit[0]
+        habit = listPisoHabit[1]
+        pisoAux = self.clonPiso(piso)
+        habitAux = 0
+        while not pisoAux.isEmpty():
+            if habit == habitAux:
+                return pisoAux.top()
+            pisoAux.dequeue()
+            habitAux += 1
+
 
 # Al recibir una pila la invierto para enviar por orden de llegada ya que ingresan a una cola
     def centralTelefonica(self, pilaDeAuxilios):
-        pilaAux = pilaDeAuxilios.invertir()
+        pilaAux = pilaDeAuxilios
+        pilaAux.invertir()
         while not pilaAux.isEmpty():
-            self.internoEn(self.oficinaMenosRecargada()[0], self.oficinaMenosRecargada()[1]).recibirAuxilio(pilaAux.pop())
+            self.oficinaMenosRecargada().recibirAuxilio(pilaAux.pop())
 
-# Completar
+# ¿recibe oficina o solo numero¡?
+# REVISAR
     def moverAuxilio(self, nroPatente, internoOficinaOrigen, internoOficinaDestino):
-        if internoOficinaOrigen.verAuxilio(nroPatente):
-            internoOficinaDestino.recibirAuxilio(internoOficinaOrigen.buscarAuxilio(nroPatente))
-            internoOficinaOrigen.eliminarAuxilio(nroPatente)
+        ofOrigen = self.getOficinaEn(self.buscaOficina(internoOficinaOrigen))
+        ofDestino = self.getOficinaEn(self.buscaOficina(internoOficinaDestino))
+        if self.verOficina(internoOficinaOrigen) and self.verOficina(internoOficinaDestino):
+            auxilio = ofOrigen.buscarAuxilio(nroPatente)
+            ofOrigen.eliminarAuxilio(nroPatente)
+            ofDestino.recibirAuxilio(auxilio)
         else:
-            raise Exception("Auxilio no valido")
+            raise Exception("interno no valido")
+
+
 
 # AUXILIAR
 # Busca el nro de interno en determinado piso y habitaculo
@@ -150,4 +224,8 @@ class EdificioEmpresa:
         else:
             raise Exception("Habitaculo ocupado")
 
-
+    def verOficina(self, nroInterno):
+        existe = False
+        if self.buscaOficina(nroInterno):
+            existe = True
+        return existe
