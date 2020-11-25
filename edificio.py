@@ -1,17 +1,31 @@
 from oficina import *
+import numpy as np
 #from pila import Stack
+
+#cant of crit rec
+#oficina menos rec
+
 
 
 # pisos y habitaculos desde el 0
+#class EdificioEmpresa:
+#    def __init__(self, cantPisos, cantHabitaculos):
+#        self.edificio = Stack()
+#        self.cantPisos = cantPisos
+#        self.cantHabitaculos = cantHabitaculos
+#        nPisos = cantPisos
+#        while nPisos != 0:
+#            self.edificio.push(self.creaPiso(cantHabitaculos))
+#            nPisos -= 1
+
+# aplicado el uso de matriz
+# se crea una matriz con None de las  dimensiones especificadas
 class EdificioEmpresa:
     def __init__(self, cantPisos, cantHabitaculos):
-        self.edificio = Stack()
+        self.edificio = np.empty((cantPisos, cantHabitaculos), object)
         self.cantPisos = cantPisos
         self.cantHabitaculos = cantHabitaculos
-        nPisos = cantPisos
-        while nPisos != 0:
-            self.edificio.push(self.creaPiso(cantHabitaculos))
-            nPisos -= 1
+
 
     def __repr__(self):
         return str(self.edificio)
@@ -27,7 +41,6 @@ class EdificioEmpresa:
         if habitaculos > 0:
             piso.enqueue(None)
             self.addHabitaculos(piso, habitaculos-1)
-
 
     def establecerOficina(self, numeroPiso, numeroHabitaculo, oficinaAtencion):
         if self.habitaculoLibre(numeroPiso, numeroHabitaculo):
@@ -57,46 +70,80 @@ class EdificioEmpresa:
 
 # HACER RECURSIVA!
 # retorna cuantas oficinas criticas hay en el piso. (iter)
-    def cantidadDeOficinasCriticas(self, piso):
-        cant = 0
-        pisoActual = self.clonPiso(piso)
-        while pisoActual.size() < 0:
-            if pisoActual.dequeue().esCritica():
-                cant += 1
-        return cant
+#    def cantidadDeOficinasCriticas(self, piso):
+#        cant = 0
+#        pisoActual = self.clonPiso(piso)
+#        while pisoActual.size() < 0:
+#            if pisoActual.dequeue().esCritica():
+#                cant += 1
+#        return cant
 
-    def cantidadDeOficinasCriticasTotal(self, piso):
-        cant = 0
-        if piso == 0:
-            cant += self.cantidadDeOficinasCriticas(piso)
-        else:
-            cant = self.cantidadDeOficinasCriticas(piso) + self.cantidadDeOficinasCriticasTotal(piso-1)
-        return cant
+############################
+############################
+    def cantidadDeOficinasCriticas(self, piso):
+        cantCrit = 0
+        nHabitaculos = self.cantHabitaculos - 1
+        if 0 <= piso < self.cantPisos:
+            if nHabitaculos > 0:
+                if self.edificio[piso][nHabitaculos].esCritica():
+                    nHabitaculos -= 1
+                    cantCrit = cantCrit + 1 + self.cantidadDeOficinasCriticas(piso)
+            elif nHabitaculos == 0:
+                if self.edificio[piso][0].esCritica():
+                    cantCrit += 1
+        return cantCrit
+
+    def oficinaMenosRecargada(self):
+        ubicacion = []
+        minimo = 999
+        for piso in self.edificio:
+            for ofi in piso:
+                if ofi is not None and ofi.colaRemolque.size() < minimo:
+                    minimo = ofi.colaRemolque.size()
+                    ubicacion = self.buscaOficina(ofi.nroInterno)
+                if minimo == 0:
+                    break
+        return ubicacion
+
+
+
+
+
+############################
+############################
+
+#    def cantidadDeOficinasCriticasTotal(self, piso):
+#        cant = 0
+#        if piso == 0:
+#            cant += self.cantidadDeOficinasCriticas(piso)
+#        else:
+#            cant = self.cantidadDeOficinasCriticas(piso) + self.cantidadDeOficinasCriticasTotal(piso-1)
+#        return cant
 
 
 ######################################
     #REVISAR
-    def oficinaMenosRecargada(self):
-        pisos = self.cantPisos -1
-        aux = None
-        while pisos != 0:
-            aux = self.menorEntre(self.oficinaMenosRecargadaEnPiso(pisos), self.oficinaMenosRecargadaEnPiso(pisos-1))
-            pisos -= 1
-        return self.menorEntre(aux, self.oficinaMenosRecargadaEnPiso(0))
+#    def oficinaMenosRecargada(self):
+#        pisos = self.cantPisos -1
+#        aux = None
+#        while pisos != 0:
+#            aux = self.menorEntre(self.oficinaMenosRecargadaEnPiso(pisos), self.oficinaMenosRecargadaEnPiso(pisos-1))
+#            pisos -= 1
+#        return self.menorEntre(aux, self.oficinaMenosRecargadaEnPiso(0))
 
 #######################
 # AUXILIAR de oficinaMenosRecargada()
-    def oficinaMenosRecargadaEnPiso(self, numeroPiso):
-        pisoAux = self.clonPiso(numeroPiso)
-        minimo = 999
-        oficina = None
-        while not pisoAux.isEmpty():
-            if pisoAux.top() is not None:
-                if pisoAux.top().auxiliosPorTipo()[0] < minimo:
-                    minimo = pisoAux.top().auxiliosPorTipo()[0]
-                    oficina = pisoAux.dequeue()
-            pisoAux.dequeue()
-        return oficina
+#    def oficinaMenosRecargadaEnPiso(self, numeroPiso):
+#        pisoAux = self.clonPiso(numeroPiso)
+#        minimo = 999
+#        oficina = None
+#        while not pisoAux.isEmpty():
+#            if pisoAux.top() is not None:
+#                if pisoAux.top().auxiliosPorTipo()[0] < minimo:
+#                    minimo = pisoAux.top().auxiliosPorTipo()[0]
+#                    oficina = pisoAux.dequeue()
+#            pisoAux.dequeue()
+#        return oficina
 
     def menorEntre(self, ofi1, ofi2):
         salida = ofi1
@@ -110,6 +157,7 @@ class EdificioEmpresa:
 
 #######################
 
+############   ELIMINAR
 # AUXILIAR de oficinaMenosRecargadaEnPiso()
     def pisoVacio(self, nroPiso):
         pisoAux = self.clonPiso(nroPiso)
@@ -229,3 +277,4 @@ class EdificioEmpresa:
         if self.buscaOficina(nroInterno):
             existe = True
         return existe
+

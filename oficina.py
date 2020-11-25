@@ -1,6 +1,11 @@
 from cola import *
 from auxilio import *
 
+#eliminar colanovacia()
+#buscazona()
+#buscapatente
+
+#separar eliminaren()
 
 class OficinaAtencion:
     def __init__(self, nroInterno, cantCritica=50):
